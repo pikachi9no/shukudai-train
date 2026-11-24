@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light" style="color-scheme: light;"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>しゅくだい列車</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&amp;display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday, for a first grader: big, calm, few words, hiragana
+   IDEA a real station stamp booklet plus a station name sign
+   PICTURE the station sign of where he is now (line colour band, prev / next)
+   COLOUR white paper, ink black, the line's own colour leads (Yamanote green, Shinkansen blue), stamp ink in line colour
+   TYPE M PLUS Rounded 1c 800 + 500
+   LAYOUT sign full width, big depart button under it, stamp book grid, lines, adult settings folded; ride screen is black */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121412);--ink:light-dark(#1b1d1b,#eef0ec);--mut:light-dark(#62665f,#a3a89f);--paper:light-dark(#f5f3ec,#1c1f1c);--edge:light-dark(#d9d6cc,#343832);--lc:#7ac143}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:500 17px/1.6 "M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,4vw,48px) max(5vw,16px)}
+.wrap{max-width:1040px;margin:0 auto}
+h1,h2{font-weight:800;line-height:1.1;letter-spacing:-.01em;margin:0}
+h1{font-size:clamp(26px,4vw,36px)}
+h2{font-size:clamp(22px,3vw,28px);margin-bottom:12px}
+.top{background:var(--lc);color:#fff}
+.top .wrap{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.top p{margin:0;font-size:16px}
+.sign{background:#fff;color:#1b1d1b;border-radius:14px;margin-top:18px;overflow:hidden;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.sign .main{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding:22px clamp(16px,3vw,32px) 16px}
+.num{border:4px solid var(--lc);border-radius:10px;padding:4px 8px;text-align:center;font-weight:800;line-height:1.05;min-width:64px}
+.num b{display:block;font-size:14px}
+.num span{font-size:26px}
+.nm{text-align:center}
+.nm .kana{font-size:clamp(18px,3vw,24px)}
+.nm .kanji{font-size:clamp(44px,9vw,80px);font-weight:800;line-height:1.05;letter-spacing:.04em;overflow-wrap:anywhere}
+.bar{background:var(--lc);color:#fff;display:flex;justify-content:space-between;gap:12px;padding:8px clamp(16px,3vw,32px);font-size:18px;font-weight:800}
+.go{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:20px}
+button{font:inherit;cursor:pointer;border-radius:999px;border:0;min-height:48px;padding:0 22px}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #ffbf00;outline-offset:3px}
+.big{background:#fff;color:#1b1d1b;font-size:26px;font-weight:800;padding:12px 40px;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+.big:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.big:disabled{opacity:.5;cursor:default}
+.meter{flex:1 1 260px;font-size:16px}
+.meter .track{height:12px;background:rgba(255,255,255,.35);border-radius:6px;overflow:hidden;margin-top:4px}
+.meter .fill{height:100%;background:#fff}
+.book{background:var(--paper)}
+.bookhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bookhead a{color:var(--ink);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px;margin-top:8px}
+.cell{background:var(--bg);border:1px solid var(--edge);border-radius:10px;padding:6px;text-align:center}
+.cell svg{width:100%;height:auto;display:block}
+.cell .cap{font-size:13px;color:var(--mut);line-height:1.3}
+.cell.here{outline:3px solid var(--lc);outline-offset:-3px}
+.lines h3{font-size:20px;margin:22px 0 10px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:10px}
+.lsum{margin:0;font-weight:800;font-size:18px}
+.tabs{display:none}
+@media (orientation:landscape) and (min-width:900px){
+html,body{height:100%}
+.app{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);height:100%}
+.top{overflow:auto;display:flex;flex-direction:column;justify-content:center;padding:20px 24px}
+.top .wrap{width:100%}
+.side{display:flex;flex-direction:column;height:100%;min-height:0;background:var(--bg)}
+.tabs{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--edge);background:var(--bg)}
+.tabs button{flex:1;background:var(--paper);color:var(--ink);font-weight:800;font-size:18px}
+.tabs button[aria-selected=true]{background:var(--lc);color:#fff}
+.panes{flex:1;overflow:auto;min-height:0}
+.panes .band{padding:20px 24px}
+.side[data-tab=book] .sec-lines,.side[data-tab=book] .sec-set,.side[data-tab=lines] .book,.side[data-tab=lines] .sec-set,.side[data-tab=set] .book,.side[data-tab=set] .sec-lines{display:none}
+.book{min-height:100%}
+.sec-set details{border:0;padding:0}
+.go{flex-direction:column;align-items:stretch}
+.big{width:100%}
+.meter{flex:none}
+.grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+}
+.ln{border:2px solid var(--edge);border-radius:14px;padding:16px;background:var(--bg);color:var(--ink);text-align:left;display:block;width:100%;border-radius:14px}
+.ln.on{border-color:var(--c);box-shadow:inset 0 0 0 2px var(--c)}
+.ln .t{font-size:19px;font-weight:800;display:flex;align-items:center;gap:10px}
+.ln .t i{width:18px;height:18px;border-radius:50%;background:var(--c);flex:none}
+.ln .s{color:var(--mut);font-size:15px}
+.badge{display:inline-block;background:var(--c);color:#fff;border-radius:999px;padding:0 12px;font-size:14px;font-weight:800;margin-top:6px}
+details{border-top:1px solid var(--edge);padding-top:12px}
+summary{cursor:pointer;font-weight:800;min-height:44px;display:flex;align-items:center}
+.set{display:grid;gap:14px;max-width:560px;margin-top:8px;font-size:16px}
+.set label{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+select{font:inherit;font-size:16px;min-height:44px;border-radius:10px;border:1px solid var(--edge);background:var(--bg);color:var(--ink);padding:0 10px}
+.ghost{background:transparent;border:2px solid var(--edge);color:var(--ink)}
+textarea{display:block;width:100%;font:inherit;font-size:16px;border:1px solid var(--edge);border-radius:10px;background:var(--bg);color:var(--ink);padding:8px;margin:8px 0}
+.small{font-size:14px;color:var(--mut);margin:4px 0 0}
+.log{font-size:15px;color:var(--mut)}
+/* overlays */
+.ov{position:fixed;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px 16px;text-align:center;overflow:auto}
+.ov.show{display:flex}
+#ride{background:#000;color:#5d625b}
+#ride .nx{font-size:20px}
+#ride .nx b{display:block;font-size:clamp(34px,8vw,56px);color:#8b9187;line-height:1.2}
+.dots{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:520px}
+.dots span{width:22px;height:22px;border-radius:50%;background:var(--lc)}
+.dots span.new{animation:pop .6s ease-out}
+#ride .msg{font-size:16px}
+#ride .rk{display:block;font-size:clamp(18px,3.5vw,26px);color:#8b9187;margin-top:8px;line-height:1.3}
+#ride button{background:#1d1f1d;color:#aab0a6;font-size:20px;padding:0 28px}
+#res{background:color-mix(in srgb,var(--bg) 96%,transparent);color:var(--ink)}
+#res h2{font-size:clamp(28px,5vw,40px)}
+.stamps{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:640px}
+.stamps svg{width:110px;height:110px}
+.stamps.got svg{animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both}
+.hold{position:relative;overflow:hidden;background:var(--lc);color:#fff;font-size:22px;font-weight:800;padding:12px 32px;user-select:none;-webkit-user-select:none;touch-action:none}
+.hold i{position:absolute;inset:0;background:rgba(0,0,0,.25);transform-origin:left;transform:scaleX(0)}
+.hold span{position:relative}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes stamp{from{transform:scale(1.8);opacity:0}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.dots span.new,.stamps.got svg{animation:none}}
+@media(max-width:600px){.sign .main{grid-template-columns:minmax(0,1fr);justify-items:center;gap:6px}.big{width:100%}.bar{font-size:15px}}
+</style>
+</head>
+<body>
+<script type="application/json" id="st">{"line":"jy","pos":{"jy":0,"tk":0},"stamps":{"東京":"start"},"done":{},"min":3,"carry":0,"rides":[],"last":null,"t":0}</script>
+
+<main class="app">
+<section class="band top">
+  <div class="wrap">
+    <h1 id="lineTitle">やまのてせん</h1>
+    <p id="today"></p>
+  </div>
+  <div class="wrap">
+    <div class="sign" id="sign"></div>
+    <div class="go">
+      <button class="big" id="depart">出発！</button>
+      <div class="meter" id="meter"></div>
+    </div>
+  </div>
+</section>
+
+<div class="side" id="side" data-tab="book">
+<nav class="tabs" id="tabs"><button data-tab="book" aria-selected="true">スタンプ帳</button><button data-tab="lines" aria-selected="false">路線を選ぶ</button><button data-tab="set" aria-selected="false">大人の設定</button></nav>
+<div class="panes">
+<section class="band book">
+  <div class="wrap">
+    <div class="bookhead">
+      <h2 id="bookTitle">駅スタンプ帳</h2>
+      <a href="https://ekimero.com/" target="_blank" rel="noopener">集めた 駅の メロディは「どこでも駅メロ」で 聞こう</a>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2 class="sec-lines-h">路線を 選ぶ</h2>
+    <div class="lines" id="lines"></div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <details id="setd">
+      <summary>大人の設定</summary>
+      <div class="set">
+        <label for="min">1駅進むのにかかる時間
+          <select id="min">
+            <option value="0.17">10秒（動作確認用）</option>
+            <option value="1">1分</option>
+            <option value="2">2分</option>
+            <option value="3">3分</option>
+            <option value="5">5分</option>
+            <option value="10">10分</option>
+          </select>
+        </label>
+        <p class="small">新幹線は駅間が長いため、この2倍の時間で1駅進みます。</p>
+        <p class="small">宿題が終わったら、子どもが「とう着」を押します。大人が宿題を確認し、「車しょう かくにん」を2秒長押しするとスタンプが押されます。次の駅に届く前に終えた場合は「とちゅう下車」となり、その時間は引き継ぎません。</p>
+        <div class="log" id="log"></div>
+        <div class="bk">
+          <p class="small">記録のバックアップ：「記録をコピー」で記録を文字にしてコピーし、メモなどに保存しておけます。元に戻すときは、その文字を貼り付けて「読み込む」を押します。</p>
+          <button class="ghost" id="bkCopy">記録をコピー</button> <span id="bkMsg" class="small"></span>
+          <textarea id="bkIn" rows="3" placeholder="ここにバックアップの文字を貼り付け"></textarea>
+          <button class="ghost" id="bkLoad">読み込む</button>
+        </div>
+        <div><button class="ghost" id="reset">記録をすべて消去する（3秒長押し）</button></div>
+      </div>
+    </details>
+  </div>
+</section>
+
+</div></div>
+</main>
+
+<div class="ov" id="ride" role="dialog" aria-label="走っています">
+  <div class="nx" id="rideNext"></div>
+  <div class="dots" id="rideDots"></div>
+  <div class="msg" id="rideMsg">画面は 見ないで 宿題を がんばろう</div>
+  <button id="arrive">とう着（終わり）</button>
+</div>
+
+<div class="ov" id="res" role="dialog" aria-label="とう着">
+  <h2 id="resTitle"></h2>
+  <div class="stamps" id="resStamps"></div>
+  <p id="resMsg"></p>
+  <button class="hold" id="approve"><i></i><span>車しょう かくにん（長おし）</span></button>
+  <button class="ghost" id="resClose">とじる</button>
+</div>
+
+<script>
+{
+const TEMPLATE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+const $ = id => document.getElementById(id);
+const OLD_LINES = {
+  jy: {name:'やまのてせん', kanji:'山手線', c:'#6aa834', code:'JY', loop:true, k:1,
+    st:'東京|とうきょう,有楽町|ゆうらくちょう,新橋|しんばし,浜松町|はままつちょう,田町|たまち,高輪ゲートウェイ|たかなわげーとうぇい,品川|しながわ,大崎|おおさき,五反田|ごたんだ,目黒|めぐろ,恵比寿|えびす,渋谷|しぶや,原宿|はらじゅく,代々木|よよぎ,新宿|しんじゅく,新大久保|しんおおくぼ,高田馬場|たかだのばば,目白|めじろ,池袋|いけぶくろ,大塚|おおつか,巣鴨|すがも,駒込|こまごめ,田端|たばた,西日暮里|にしにっぽり,日暮里|にっぽり,鶯谷|うぐいすだに,上野|うえの,御徒町|おかちまち,秋葉原|あきはばら,神田|かんだ'},
+  tk: {name:'とうかいどうしんかんせん', kanji:'東海道新幹線', c:'#1d5fbf', code:'', loop:false, k:2,
+    st:'東京|とうきょう,品川|しながわ,新横浜|しんよこはま,小田原|おだわら,熱海|あたみ,三島|みしま,新富士|しんふじ,静岡|しずおか,掛川|かけがわ,浜松|はままつ,豊橋|とよはし,三河安城|みかわあんじょう,名古屋|なごや,岐阜羽島|ぎふはしま,米原|まいばら,京都|きょうと,新大阪|しんおおさか'}
+};
+const CATS = [['shin','新幹線'],['jr','JR'],['sub','地下鉄'],['pri','私鉄・そのほか']];
+const RAW = [
+{id:'tk',name:'とうかいどうしんかんせん',kanji:'東海道新幹線',c:'#1d5fbf',cat:'shin',st:'東京|とうきょう,品川|しながわ,新横浜|しんよこはま,小田原|おだわら,熱海|あたみ,三島|みしま,新富士|しんふじ,静岡|しずおか,掛川|かけがわ,浜松|はままつ,豊橋|とよはし,三河安城|みかわあんじょう,名古屋|なごや,岐阜羽島|ぎふはしま,米原|まいばら,京都|きょうと,新大阪|しんおおさか'},
+{id:'sy',name:'さんようしんかんせん',kanji:'山陽新幹線',c:'#2b6cb0',cat:'shin',st:'新大阪|しんおおさか,新神戸|しんこうべ,西明石|にしあかし,姫路|ひめじ,相生|あいおい,岡山|おかやま,新倉敷|しんくらしき,福山|ふくやま,新尾道|しんおのみち,三原|みはら,東広島|ひがしひろしま,広島|ひろしま,新岩国|しんいわくに,徳山|とくやま,新山口|しんやまぐち,厚狭|あさ,新下関|しんしものせき,小倉|こくら,博多|はかた'},
+{id:'ky',name:'きゅうしゅうしんかんせん',kanji:'九州新幹線',c:'#b8322e',cat:'shin',st:'博多|はかた,新鳥栖|しんとす,久留米|くるめ,筑後船小屋|ちくごふなごや,新大牟田|しんおおむた,新玉名|しんたまな,熊本|くまもと,新八代|しんやつしろ,新水俣|しんみなまた,出水|いずみ,川内|せんだい,鹿児島中央|かごしまちゅうおう'},
+{id:'nk',name:'にしきゅうしゅうしんかんせん',kanji:'西九州新幹線',c:'#8c1d40',cat:'shin',st:'武雄温泉|たけおおんせん,嬉野温泉|うれしのおんせん,新大村|しんおおむら,諫早|いさはや,長崎|ながさき'},
+{id:'th',name:'とうほくしんかんせん',kanji:'東北新幹線',c:'#1f8a4c',cat:'shin',st:'東京|とうきょう,上野|うえの,大宮|おおみや,小山|おやま,宇都宮|うつのみや,那須塩原|なすしおばら,新白河|しんしらかわ,郡山|こおりやま,福島|ふくしま,白石蔵王|しろいしざおう,仙台|せんだい,古川|ふるかわ,くりこま高原|くりこまこうげん,一ノ関|いちのせき,水沢江刺|みずさわえさし,北上|きたかみ,新花巻|しんはなまき,盛岡|もりおか,いわて沼宮内|いわてぬまくない,二戸|にのへ,八戸|はちのへ,七戸十和田|しちのへとわだ,新青森|しんあおもり'},
+{id:'hh',name:'ほっかいどうしんかんせん',kanji:'北海道新幹線',c:'#6b4fb5',cat:'shin',st:'新青森|しんあおもり,奥津軽いまべつ|おくつがるいまべつ,木古内|きこない,新函館北斗|しんはこだてほくと'},
+{id:'jo',name:'じょうえつしんかんせん',kanji:'上越新幹線',c:'#d6457a',cat:'shin',st:'東京|とうきょう,上野|うえの,大宮|おおみや,熊谷|くまがや,本庄早稲田|ほんじょうわせだ,高崎|たかさき,上毛高原|じょうもうこうげん,越後湯沢|えちごゆざわ,浦佐|うらさ,長岡|ながおか,燕三条|つばめさんじょう,新潟|にいがた'},
+{id:'hr',name:'ほくりくしんかんせん',kanji:'北陸新幹線',c:'#a07a2c',cat:'shin',st:'東京|とうきょう,上野|うえの,大宮|おおみや,熊谷|くまがや,本庄早稲田|ほんじょうわせだ,高崎|たかさき,安中榛名|あんなかはるな,軽井沢|かるいざわ,佐久平|さくだいら,上田|うえだ,長野|ながの,飯山|いいやま,上越妙高|じょうえつみょうこう,糸魚川|いといがわ,黒部宇奈月温泉|くろべうなづきおんせん,富山|とやま,新高岡|しんたかおか,金沢|かなざわ,小松|こまつ,加賀温泉|かがおんせん,芦原温泉|あわらおんせん,福井|ふくい,越前たけふ|えちぜんたけふ,敦賀|つるが'},
+{id:'ak',name:'あきたしんかんせん',kanji:'秋田新幹線',c:'#cc2a4f',cat:'shin',st:'盛岡|もりおか,雫石|しずくいし,田沢湖|たざわこ,角館|かくのだて,大曲|おおまがり,秋田|あきた'},
+{id:'ym',name:'やまがたしんかんせん',kanji:'山形新幹線',c:'#7a3f9a',cat:'shin',st:'福島|ふくしま,米沢|よねざわ,高畠|たかはた,赤湯|あかゆ,かみのやま温泉|かみのやまおんせん,山形|やまがた,天童|てんどう,さくらんぼ東根|さくらんぼひがしね,村山|むらやま,大石田|おおいしだ,新庄|しんじょう'},
+{id:'gl',name:'がーらゆざわ（おまけ）',kanji:'ガーラ湯沢への線',c:'#3f8fc4',cat:'shin',st:'越後湯沢|えちごゆざわ,ガーラ湯沢|がーらゆざわ'},
+{id:'hm',name:'はかたみなみせん（おまけ）',kanji:'博多南線',c:'#2b6cb0',cat:'shin',st:'博多|はかた,博多南|はかたみなみ'},
+{id:'jy',name:'やまのてせん',kanji:'山手線',c:'#6aa834',code:'JY',loop:1,cat:'jr',st:'東京|とうきょう,有楽町|ゆうらくちょう,新橋|しんばし,浜松町|はままつちょう,田町|たまち,高輪ゲートウェイ|たかなわげーとうぇい,品川|しながわ,大崎|おおさき,五反田|ごたんだ,目黒|めぐろ,恵比寿|えびす,渋谷|しぶや,原宿|はらじゅく,代々木|よよぎ,新宿|しんじゅく,新大久保|しんおおくぼ,高田馬場|たかだのばば,目白|めじろ,池袋|いけぶくろ,大塚|おおつか,巣鴨|すがも,駒込|こまごめ,田端|たばた,西日暮里|にしにっぽり,日暮里|にっぽり,鴬谷|うぐいすだに,上野|うえの,御徒町|おかちまち,秋葉原|あきはばら,神田|かんだ'},
+{id:'jk',name:'けいひんとうほく・ねぎしせん',kanji:'京浜東北・根岸線',c:'#0099d6',code:'JK',start:47,dir:-1,cat:'jr',st:'大宮|おおみや,さいたま新都心|さいたましんとしん,与野|よの,北浦和|きたうらわ,浦和|うらわ,南浦和|みなみうらわ,蕨|わらび,西川口|にしかわぐち,川口|かわぐち,赤羽|あかばね,東十条|ひがしじゅうじょう,王子|おうじ,上中里|かみなかざと,田端|たばた,西日暮里|にしにっぽり,日暮里|にっぽり,鴬谷|うぐいすだに,上野|うえの,御徒町|おかちまち,秋葉原|あきはばら,神田|かんだ,東京|とうきょう,有楽町|ゆうらくちょう,新橋|しんばし,浜松町|はままつちょう,田町|たまち,高輪ゲートウェイ|たかなわげーとうぇい,品川|しながわ,大井町|おおいまち,大森|おおもり,蒲田|かまた,川崎|かわさき,鶴見|つるみ,新子安|しんこやす,東神奈川|ひがしかながわ,横浜|よこはま,桜木町|さくらぎちょう,関内|かんない,石川町|いしかわちょう,山手|やまて,根岸|ねぎし,磯子|いそご,新杉田|しんすぎた,洋光台|ようこうだい,港南台|こうなんだい,本郷台|ほんごうだい,大船|おおふな'},
+{id:'jc',name:'ちゅうおうせんかいそく',kanji:'中央線快速',c:'#f15a22',code:'JC',cat:'jr',st:'東京|とうきょう,神田|かんだ,御茶ノ水|おちゃのみず,四ツ谷|よつや,新宿|しんじゅく,中野|なかの,高円寺|こうえんじ,阿佐ケ谷|あさがや,荻窪|おぎくぼ,西荻窪|にしおぎくぼ,吉祥寺|きちじょうじ,三鷹|みたか,武蔵境|むさしさかい,東小金井|ひがしこがねい,武蔵小金井|むさしこがねい,国分寺|こくぶんじ,西国分寺|にしこくぶんじ,国立|くにたち,立川|たちかわ,日野|ひの,豊田|とよだ,八王子|はちおうじ,西八王子|にしはちおうじ,高尾|たかお'},
+{id:'jb',name:'ちゅうおう・そうぶせん',kanji:'中央・総武線各駅停車',c:'#c99a00',code:'JB',cat:'jr',st:'三鷹|みたか,吉祥寺|きちじょうじ,西荻窪|にしおぎくぼ,荻窪|おぎくぼ,阿佐ケ谷|あさがや,高円寺|こうえんじ,中野|なかの,東中野|ひがしなかの,大久保|おおくぼ,新宿|しんじゅく,代々木|よよぎ,千駄ケ谷|せんだがや,信濃町|しなのまち,四ツ谷|よつや,市ケ谷|いちがや,飯田橋|いいだばし,水道橋|すいどうばし,御茶ノ水|おちゃのみず,秋葉原|あきはばら,浅草橋|あさくさばし,両国|りょうごく,錦糸町|きんしちょう,亀戸|かめいど,平井|ひらい,新小岩|しんこいわ,小岩|こいわ,市川|いちかわ,本八幡|もとやわた,下総中山|しもうさなかやま,西船橋|にしふなばし,船橋|ふなばし,東船橋|ひがしふなばし,津田沼|つだぬま,幕張本郷|まくはりほんごう,幕張|まくはり,新検見川|しんけみがわ,稲毛|いなげ,西千葉|にしちば,千葉|ちば'},
+{id:'ja',name:'さいきょうせん',kanji:'埼京線',c:'#00a497',cat:'jr',st:'大崎|おおさき,恵比寿|えびす,渋谷|しぶや,新宿|しんじゅく,池袋|いけぶくろ,板橋|いたばし,十条|じゅうじょう,赤羽|あかばね,北赤羽|きたあかばね,浮間舟渡|うきまふなど,戸田公園|とだこうえん,戸田|とだ,北戸田|きたとだ,武蔵浦和|むさしうらわ,中浦和|なかうらわ,南与野|みなみよの,与野本町|よのほんまち,北与野|きたよの,大宮|おおみや,日進|にっしん,西大宮|にしおおみや,指扇|さしおうぎ,南古谷|みなみふるや,川越|かわごえ'},
+{id:'jo2',name:'よこすかせん',kanji:'横須賀線',c:'#1c63b7',cat:'jr',st:'東京|とうきょう,新橋|しんばし,品川|しながわ,西大井|にしおおい,武蔵小杉|むさしこすぎ,新川崎|しんかわさき,横浜|よこはま,保土ケ谷|ほどがや,東戸塚|ひがしとつか,戸塚|とつか,大船|おおふな,北鎌倉|きたかまくら,鎌倉|かまくら,逗子|ずし,東逗子|ひがしずし,田浦|たうら,横須賀|よこすか,衣笠|きぬがさ,久里浜|くりはま'},
+{id:'jj',name:'じょうばんせんかいそく',kanji:'常磐線快速',c:'#1a9e5c',cat:'jr',st:'上野|うえの,日暮里|にっぽり,三河島|みかわしま,南千住|みなみせんじゅ,北千住|きたせんじゅ,松戸|まつど,柏|かしわ,我孫子|あびこ,天王台|てんのうだい,取手|とりで'},
+{id:'jm',name:'むさしのせん',kanji:'武蔵野線',c:'#e8692e',cat:'jr',st:'府中本町|ふちゅうほんまち,北府中|きたふちゅう,西国分寺|にしこくぶんじ,新小平|しんこだいら,新秋津|しんあきつ,東所沢|ひがしところざわ,新座|にいざ,北朝霞|きたあさか,西浦和|にしうらわ,武蔵浦和|むさしうらわ,南浦和|みなみうらわ,東浦和|ひがしうらわ,東川口|ひがしかわぐち,南越谷|みなみこしがや,越谷レイクタウン|こしがやれいくたうん,吉川|よしかわ,吉川美南|よしかわみなみ,新三郷|しんみさと,三郷|みさと,南流山|みなみながれやま,新松戸|しんまつど,新八柱|しんやはしら,東松戸|ひがしまつど,市川大野|いちかわおおの,船橋法典|ふなばしほうてん,西船橋|にしふなばし'},
+{id:'jn',name:'なんぶせん',kanji:'南武線',c:'#b89400',code:'JN',cat:'jr',st:'川崎|かわさき,尻手|しって,矢向|やこう,鹿島田|かしまだ,平間|ひらま,向河原|むかいがわら,武蔵小杉|むさしこすぎ,武蔵中原|むさしなかはら,武蔵新城|むさししんじょう,武蔵溝ノ口|むさしみぞのくち,津田山|つだやま,久地|くじ,宿河原|しゅくがわら,登戸|のぼりと,中野島|なかのしま,稲田堤|いなだづつみ,矢野口|やのくち,稲城長沼|いなぎながぬま,南多摩|みなみたま,府中本町|ふちゅうほんまち,分倍河原|ぶばいがわら,西府|にしふ,谷保|やほ,矢川|やがわ,西国立|にしくにたち,立川|たちかわ'},
+{id:'jh',name:'よこはません',kanji:'横浜線',c:'#6a9e2a',cat:'jr',st:'東神奈川|ひがしかながわ,大口|おおぐち,菊名|きくな,新横浜|しんよこはま,小机|こづくえ,鴨居|かもい,中山|なかやま,十日市場|とおかいちば,長津田|ながつた,成瀬|なるせ,町田|まちだ,古淵|こぶち,淵野辺|ふちのべ,相模原|さがみはら,矢部|やべ,橋本|はしもと,相原|あいはら,八王子みなみ野|はちおうじみなみの,片倉|かたくら,八王子|はちおうじ'},
+{id:'je',name:'けいようせん',kanji:'京葉線',c:'#c9252f',cat:'jr',st:'東京|とうきょう,八丁堀|はっちょうぼり,越中島|えっちゅうじま,潮見|しおみ,新木場|しんきば,葛西臨海公園|かさいりんかいこうえん,舞浜|まいはま,新浦安|しんうらやす,市川塩浜|いちかわしおはま,二俣新町|ふたまたしんまち,南船橋|みなみふなばし,新習志野|しんならしの,幕張豊砂|まくはりとよすな,海浜幕張|かいひんまくはり,検見川浜|けみがわはま,稲毛海岸|いなげかいがん,千葉みなと|ちばみなと,蘇我|そが'},
+{id:'jo3',name:'おおさかかんじょうせん',kanji:'大阪環状線',c:'#e0301e',code:'O',loop:1,cat:'jr',st:'大阪|おおさか,福島|ふくしま|福島(大阪),野田|のだ,西九条|にしくじょう,弁天町|べんてんちょう,大正|たいしょう,芦原橋|あしはらばし,今宮|いまみや,新今宮|しんいまみや,天王寺|てんのうじ,寺田町|てらだちょう,桃谷|ももだに,鶴橋|つるはし,玉造|たまつくり,森ノ宮|もりのみや,大阪城公園|おおさかじょうこうえん,京橋|きょうばし|京橋(大阪),桜ノ宮|さくらのみや,天満|てんま'},
+{id:'g',name:'ぎんざせん',kanji:'銀座線',c:'#e08a00',code:'G',cat:'sub',st:'渋谷|しぶや,表参道|おもてさんどう,外苑前|がいえんまえ,青山一丁目|あおやまいっちょうめ,赤坂見附|あかさかみつけ,溜池山王|ためいけさんのう,虎ノ門|とらのもん,新橋|しんばし,銀座|ぎんざ,京橋|きょうばし,日本橋|にほんばし,三越前|みつこしまえ,神田|かんだ,末広町|すえひろちょう,上野広小路|うえのひろこうじ,上野|うえの,稲荷町|いなりちょう,田原町|たわらまち,浅草|あさくさ'},
+{id:'m',name:'まるのうちせん',kanji:'丸ノ内線',c:'#e8262f',code:'M',cat:'sub',st:'荻窪|おぎくぼ,南阿佐ケ谷|みなみあさがや,新高円寺|しんこうえんじ,東高円寺|ひがしこうえんじ,新中野|しんなかの,中野坂上|なかのさかうえ,西新宿|にししんじゅく,新宿|しんじゅく,新宿三丁目|しんじゅくさんちょうめ,新宿御苑前|しんじゅくぎょえんまえ,四谷三丁目|よつやさんちょうめ,四ツ谷|よつや,赤坂見附|あかさかみつけ,国会議事堂前|こっかいぎじどうまえ,霞ケ関|かすみがせき,銀座|ぎんざ,東京|とうきょう,大手町|おおてまち,淡路町|あわじちょう,御茶ノ水|おちゃのみず,本郷三丁目|ほんごうさんちょうめ,後楽園|こうらくえん,茗荷谷|みょうがだに,新大塚|しんおおつか,池袋|いけぶくろ'},
+{id:'h',name:'ひびやせん',kanji:'日比谷線',c:'#86877c',code:'H',cat:'sub',st:'中目黒|なかめぐろ,恵比寿|えびす,広尾|ひろお,六本木|ろっぽんぎ,神谷町|かみやちょう,虎ノ門ヒルズ|とらのもんひるず,霞ケ関|かすみがせき,日比谷|ひびや,銀座|ぎんざ,東銀座|ひがしぎんざ,築地|つきじ,八丁堀|はっちょうぼり,茅場町|かやばちょう,人形町|にんぎょうちょう,小伝馬町|こでんまちょう,秋葉原|あきはばら,仲御徒町|なかおかちまち,上野|うえの,入谷|いりや,三ノ輪|みのわ,南千住|みなみせんじゅ,北千住|きたせんじゅ'},
+{id:'t',name:'とうざいせん',kanji:'東西線',c:'#0094bb',code:'T',cat:'sub',st:'中野|なかの,落合|おちあい,高田馬場|たかだのばば,早稲田|わせだ,神楽坂|かぐらざか,飯田橋|いいだばし,九段下|くだんした,竹橋|たけばし,大手町|おおてまち,日本橋|にほんばし,茅場町|かやばちょう,門前仲町|もんぜんなかちょう,木場|きば,東陽町|とうようちょう,南砂町|みなみすなまち,西葛西|にしかさい,葛西|かさい,浦安|うらやす,南行徳|みなみぎょうとく,行徳|ぎょうとく,妙典|みょうでん,原木中山|ばらきなかやま,西船橋|にしふなばし'},
+{id:'c',name:'ちよだせん',kanji:'千代田線',c:'#00a375',code:'C',cat:'sub',st:'代々木上原|よよぎうえはら,代々木公園|よよぎこうえん,明治神宮前|めいじじんぐうまえ,表参道|おもてさんどう,乃木坂|のぎざか,赤坂|あかさか,国会議事堂前|こっかいぎじどうまえ,霞ケ関|かすみがせき,日比谷|ひびや,二重橋前|にじゅうばしまえ,大手町|おおてまち,新御茶ノ水|しんおちゃのみず,湯島|ゆしま,根津|ねづ,千駄木|せんだぎ,西日暮里|にしにっぽり,町屋|まちや,北千住|きたせんじゅ,綾瀬|あやせ'},
+{id:'y',name:'ゆうらくちょうせん',kanji:'有楽町線',c:'#a88a50',code:'Y',cat:'sub',st:'和光市|わこうし,地下鉄成増|ちかてつなります,地下鉄赤塚|ちかてつあかつか,平和台|へいわだい,氷川台|ひかわだい,小竹向原|こたけむかいはら,千川|せんかわ,要町|かなめちょう,池袋|いけぶくろ,東池袋|ひがしいけぶくろ,護国寺|ごこくじ,江戸川橋|えどがわばし,飯田橋|いいだばし,市ケ谷|いちがや,麹町|こうじまち,永田町|ながたちょう,桜田門|さくらだもん,有楽町|ゆうらくちょう,銀座一丁目|ぎんざいっちょうめ,新富町|しんとみちょう,月島|つきしま,豊洲|とよす,辰巳|たつみ,新木場|しんきば'},
+{id:'z',name:'はんぞうもんせん',kanji:'半蔵門線',c:'#8f76d6',code:'Z',cat:'sub',st:'渋谷|しぶや,表参道|おもてさんどう,青山一丁目|あおやまいっちょうめ,永田町|ながたちょう,半蔵門|はんぞうもん,九段下|くだんした,神保町|じんぼうちょう,大手町|おおてまち,三越前|みつこしまえ,水天宮前|すいてんぐうまえ,清澄白河|きよすみしらかわ,住吉|すみよし,錦糸町|きんしちょう,押上|おしあげ'},
+{id:'n',name:'なんぼくせん',kanji:'南北線',c:'#00998a',code:'N',cat:'sub',st:'目黒|めぐろ,白金台|しろかねだい,白金高輪|しろかねたかなわ,麻布十番|あざぶじゅうばん,六本木一丁目|ろっぽんぎいっちょうめ,溜池山王|ためいけさんのう,永田町|ながたちょう,四ツ谷|よつや,市ケ谷|いちがや,飯田橋|いいだばし,後楽園|こうらくえん,東大前|とうだいまえ,本駒込|ほんこまごめ,駒込|こまごめ,西ケ原|にしがはら,王子|おうじ,王子神谷|おうじかみや,志茂|しも,赤羽岩淵|あかばねいわぶち'},
+{id:'f',name:'ふくとしんせん',kanji:'副都心線',c:'#9c5e31',code:'F',cat:'sub',st:'和光市|わこうし,地下鉄成増|ちかてつなります,地下鉄赤塚|ちかてつあかつか,平和台|へいわだい,氷川台|ひかわだい,小竹向原|こたけむかいはら,千川|せんかわ,要町|かなめちょう,池袋|いけぶくろ,雑司が谷|ぞうしがや,西早稲田|にしわせだ,東新宿|ひがししんじゅく,新宿三丁目|しんじゅくさんちょうめ,北参道|きたさんどう,明治神宮前|めいじじんぐうまえ,渋谷|しぶや'},
+{id:'a',name:'とえいあさくさせん',kanji:'都営浅草線',c:'#e04a8f',code:'A',cat:'sub',st:'西馬込|にしまごめ,馬込|まごめ,中延|なかのぶ,戸越|とごし,五反田|ごたんだ,高輪台|たかなわだい,泉岳寺|せんがくじ,三田|みた,大門|だいもん,新橋|しんばし,東銀座|ひがしぎんざ,宝町|たからちょう,日本橋|にほんばし,人形町|にんぎょうちょう,東日本橋|ひがしにほんばし,浅草橋|あさくさばし,蔵前|くらまえ,浅草|あさくさ,本所吾妻橋|ほんじょあづまばし,押上|おしあげ'},
+{id:'i',name:'とえいみたせん',kanji:'都営三田線',c:'#0079c2',code:'I',cat:'sub',st:'目黒|めぐろ,白金台|しろかねだい,白金高輪|しろかねたかなわ,三田|みた,芝公園|しばこうえん,御成門|おなりもん,内幸町|うちさいわいちょう,日比谷|ひびや,大手町|おおてまち,神保町|じんぼうちょう,水道橋|すいどうばし,春日|かすが,白山|はくさん,千石|せんごく,巣鴨|すがも,西巣鴨|にしすがも,新板橋|しんいたばし,板橋区役所前|いたばしくやくしょまえ,板橋本町|いたばしほんちょう,本蓮沼|もとはすぬま,志村坂上|しむらさかうえ,志村三丁目|しむらさんちょうめ,蓮根|はすね,西台|にしだい,高島平|たかしまだいら,新高島平|しんたかしまだいら,西高島平|にしたかしまだいら'},
+{id:'s',name:'とえいしんじゅくせん',kanji:'都営新宿線',c:'#4f9e3e',code:'S',cat:'sub',st:'新宿|しんじゅく,新宿三丁目|しんじゅくさんちょうめ,曙橋|あけぼのばし,市ケ谷|いちがや,九段下|くだんした,神保町|じんぼうちょう,小川町|おがわまち,岩本町|いわもとちょう,馬喰横山|ばくろよこやま,浜町|はまちょう,森下|もりした,菊川|きくかわ,住吉|すみよし,西大島|にしおおじま,大島|おおじま,東大島|ひがしおおじま,船堀|ふなぼり,一之江|いちのえ,瑞江|みずえ,篠崎|しのざき,本八幡|もとやわた'},
+{id:'e',name:'とえいおおえどせん',kanji:'都営大江戸線',c:'#b6007a',code:'E',cat:'sub',st:'新宿西口|しんじゅくにしぐち,東新宿|ひがししんじゅく,若松河田|わかまつかわだ,牛込柳町|うしごめやなぎちょう,牛込神楽坂|うしごめかぐらざか,飯田橋|いいだばし,春日|かすが,本郷三丁目|ほんごうさんちょうめ,上野御徒町|うえのおかちまち,新御徒町|しんおかちまち,蔵前|くらまえ,両国|りょうごく,森下|もりした,清澄白河|きよすみしらかわ,門前仲町|もんぜんなかちょう,月島|つきしま,勝どき|かちどき,築地市場|つきじしじょう,汐留|しおどめ,大門|だいもん,赤羽橋|あかばねばし,麻布十番|あざぶじゅうばん,六本木|ろっぽんぎ,青山一丁目|あおやまいっちょうめ,国立競技場|こくりつきょうぎじょう,代々木|よよぎ,新宿|しんじゅく,都庁前|とちょうまえ,西新宿五丁目|にししんじゅくごちょうめ,中野坂上|なかのさかうえ,東中野|ひがしなかの,中井|なかい,落合南長崎|おちあいみなみながさき,新江古田|しんえごた,練馬|ねりま,豊島園|としまえん,練馬春日町|ねりまかすがちょう,光が丘|ひかりがおか'},
+{id:'kn',name:'さっぽろしえいなんぼくせん',kanji:'札幌市営南北線',c:'#2a8a3e',code:'N',cat:'sub',st:'麻生|あさぶ,北34条|きたさんじゅうよじょう,北24条|きたにじゅうよじょう,北18条|きたじゅうはちじょう,北12条|きたじゅうにじょう,さっぽろ|さっぽろ,大通|おおどおり,すすきの|すすきの,中島公園|なかじまこうえん,幌平橋|ほろひらばし,中の島|なかのしま,平岸|ひらぎし,南平岸|みなみひらぎし,澄川|すみかわ,自衛隊前|じえいたいまえ,真駒内|まこまない'},
+{id:'sd',name:'せんだいしちかてつなんぼくせん',kanji:'仙台市地下鉄南北線',c:'#2a9a4a',code:'N',cat:'sub',st:'泉中央|いずみちゅうおう,八乙女|やおとめ,黒松|くろまつ,旭ヶ丘|あさひがおか,台原|だいのはら,北仙台|きたせんだい,北四番丁|きたよばんちょう,勾当台公園|こうとうだいこうえん,広瀬通|ひろせどおり,仙台|せんだい,五橋|いつつばし,愛宕橋|あたごばし,河原町|かわらまち,長町一丁目|ながまちいっちょうめ,長町|ながまち,長町南|ながまちみなみ,富沢|とみざわ'},
+{id:'bl',name:'よこはましえいぶるーらいん',kanji:'横浜市営ブルーライン',c:'#0072bc',code:'B',cat:'sub',st:'湘南台|しょうなんだい,下飯田|しもいいだ,立場|たてば,中田|なかだ,踊場|おどりば,戸塚|とつか,舞岡|まいおか,下永谷|しもながや,上永谷|かみながや,港南中央|こうなんちゅうおう,上大岡|かみおおおか,弘明寺|ぐみょうじ,蒔田|まいた,吉野町|よしのちょう,阪東橋|ばんとうばし,伊勢佐木長者町|いせざきちょうじゃまち,関内|かんない,桜木町|さくらぎちょう,高島町|たかしまちょう,横浜|よこはま,三ツ沢下町|みつざわしもちょう,三ツ沢上町|みつざわかみちょう,片倉町|かたくらちょう,岸根公園|きしねこうえん,新横浜|しんよこはま,北新横浜|きたしんよこはま,新羽|にっぱ,仲町台|なかまちだい,センター南|せんたーみなみ,センター北|せんたーきた,中川|なかがわ,あざみ野|あざみの'},
+{id:'hg',name:'なごやしえいひがしやません',kanji:'名古屋市営東山線',c:'#c99a00',code:'H',cat:'sub',st:'高畑|たかばた,八田|はった,岩塚|いわつか,中村公園|なかむらこうえん,中村日赤|なかむらにっせき,本陣|ほんじん,亀島|かめじま,名古屋|なごや,伏見|ふしみ,栄|さかえ,新栄町|しんさかえまち,千種|ちくさ,今池|いまいけ,池下|いけした,覚王山|かくおうざん,本山|もとやま,東山公園|ひがしやまこうえん,星ヶ丘|ほしがおか,一社|いっしゃ,上社|かみやしろ,本郷|ほんごう,藤が丘|ふじがおか|藤が丘(名古屋)'},
+{id:'md',name:'おおさかめとろみどうすじせん',kanji:'Osaka Metro御堂筋線',c:'#d81e2c',code:'M',start:11,cat:'sub',st:'江坂|えさか,東三国|ひがしみくに,新大阪|しんおおさか,西中島南方|にしなかじまみなみかた,中津|なかつ,梅田|うめだ,淀屋橋|よどやばし,本町|ほんまち,心斎橋|しんさいばし,なんば|なんば,大国町|だいこくちょう,動物園前|どうぶつえんまえ,天王寺|てんのうじ,昭和町|しょうわちょう,西田辺|にしたなべ,長居|ながい,あびこ|あびこ,北花田|きたはなだ,新金岡|しんかなおか,なかもず|なかもず'},
+{id:'fk',name:'ふくおかしちかてつくうこうせん',kanji:'福岡市地下鉄空港線',c:'#e05a1e',code:'K',cat:'sub',st:'姪浜|めいのはま,室見|むろみ,藤崎|ふじさき,西新|にしじん,唐人町|とうじんまち,大濠公園|おおほりこうえん,赤坂|あかさか|赤坂(福岡),天神|てんじん,中洲川端|なかすかわばた,祇園|ぎおん,博多|はかた,東比恵|ひがしひえ,福岡空港|ふくおかくうこう'},
+{id:'ty',name:'とうきゅうとうよこせん',kanji:'東急東横線',c:'#da0442',code:'TY',cat:'pri',st:'渋谷|しぶや,代官山|だいかんやま,中目黒|なかめぐろ,祐天寺|ゆうてんじ,学芸大学|がくげいだいがく,都立大学|とりつだいがく,自由が丘|じゆうがおか,田園調布|でんえんちょうふ,多摩川|たまがわ,新丸子|しんまるこ,武蔵小杉|むさしこすぎ,元住吉|もとすみよし,日吉|ひよし,綱島|つなしま,大倉山|おおくらやま,菊名|きくな,妙蓮寺|みょうれんじ,白楽|はくらく,東白楽|ひがしはくらく,反町|たんまち,横浜|よこはま'},
+{id:'dt',name:'とうきゅうでんえんとしせん',kanji:'東急田園都市線',c:'#20a288',code:'DT',cat:'pri',st:'渋谷|しぶや,池尻大橋|いけじりおおはし,三軒茶屋|さんげんちゃや,駒沢大学|こまざわだいがく,桜新町|さくらしんまち,用賀|ようが,二子玉川|ふたこたまがわ,二子新地|ふたこしんち,高津|たかつ,溝の口|みぞのくち,梶が谷|かじがや,宮崎台|みやざきだい,宮前平|みやまえだいら,鷺沼|さぎぬま,たまプラーザ|たまぷらーざ,あざみ野|あざみの,江田|えだ,市が尾|いちがお,藤が丘|ふじがおか,青葉台|あおばだい,田奈|たな,長津田|ながつた,つくし野|つくしの,すずかけ台|すずかけだい,南町田グランベリーパーク|みなみまちだぐらんべりーぱーく,つきみ野|つきみの,中央林間|ちゅうおうりんかん'},
+{id:'mg',name:'とうきゅうめぐろせん',kanji:'東急目黒線',c:'#009cd2',code:'MG',cat:'pri',st:'目黒|めぐろ,不動前|ふどうまえ,武蔵小山|むさしこやま,西小山|にしこやま,洗足|せんぞく,大岡山|おおおかやま,奥沢|おくさわ,田園調布|でんえんちょうふ,多摩川|たまがわ,新丸子|しんまるこ,武蔵小杉|むさしこすぎ,元住吉|もとすみよし,日吉|ひよし'},
+{id:'om',name:'とうきゅうおおいまちせん',kanji:'東急大井町線',c:'#e57c2a',code:'OM',cat:'pri',st:'大井町|おおいまち,下神明|しもしんめい,戸越公園|とごしこうえん,中延|なかのぶ,荏原町|えばらまち,旗の台|はたのだい,北千束|きたせんぞく,大岡山|おおおかやま,緑が丘|みどりがおか,自由が丘|じゆうがおか,九品仏|くほんぶつ,尾山台|おやまだい,等々力|とどろき,上野毛|かみのげ,二子玉川|ふたこたまがわ,溝の口|みぞのくち'},
+{id:'oh',name:'おだきゅうおだわらせん',kanji:'小田急小田原線',c:'#0d82c7',code:'OH',cat:'pri',st:'新宿|しんじゅく,南新宿|みなみしんじゅく,参宮橋|さんぐうばし,代々木八幡|よよぎはちまん,代々木上原|よよぎうえはら,東北沢|ひがしきたざわ,下北沢|しもきたざわ,世田谷代田|せたがやだいた,梅ヶ丘|うめがおか,豪徳寺|ごうとくじ,経堂|きょうどう,千歳船橋|ちとせふなばし,祖師ヶ谷大蔵|そしがやおおくら,成城学園前|せいじょうがくえんまえ,喜多見|きたみ,狛江|こまえ,和泉多摩川|いずみたまがわ,登戸|のぼりと,向ヶ丘遊園|むこうがおかゆうえん,生田|いくた,読売ランド前|よみうりらんどまえ,百合ヶ丘|ゆりがおか,新百合ヶ丘|しんゆりがおか,柿生|かきお,鶴川|つるかわ,玉川学園前|たまがわがくえんまえ,町田|まちだ,相模大野|さがみおおの,小田急相模原|おだきゅうさがみはら,相武台前|そうぶだいまえ,座間|ざま,海老名|えびな,厚木|あつぎ,本厚木|ほんあつぎ,愛甲石田|あいこういしだ,伊勢原|いせはら,鶴巻温泉|つるまきおんせん,東海大学前|とうかいだいがくまえ,秦野|はだの,渋沢|しぶさわ,新松田|しんまつだ,開成|かいせい,栢山|かやま,富水|とみず,螢田|ほたるだ,足柄|あしがら,小田原|おだわら'},
+{id:'ko',name:'けいおうせん',kanji:'京王線',c:'#dd0077',code:'KO',cat:'pri',st:'新宿|しんじゅく,初台|はつだい,幡ヶ谷|はたがや,笹塚|ささづか,代田橋|だいたばし,明大前|めいだいまえ,下高井戸|しもたかいど,桜上水|さくらじょうすい,上北沢|かみきたざわ,八幡山|はちまんやま,芦花公園|ろかこうえん,千歳烏山|ちとせからすやま,仙川|せんがわ,つつじヶ丘|つつじがおか,柴崎|しばさき,国領|こくりょう,布田|ふだ,調布|ちょうふ,西調布|にしちょうふ,飛田給|とびたきゅう,武蔵野台|むさしのだい,多磨霊園|たまれいえん,東府中|ひがしふちゅう,府中|ふちゅう,分倍河原|ぶばいがわら,中河原|なかがわら,聖蹟桜ヶ丘|せいせきさくらがおか,百草園|もぐさえん,高幡不動|たかはたふどう,南平|みなみだいら,平山城址公園|ひらやまじょうしこうえん,長沼|ながぬま,北野|きたの,京王八王子|けいおうはちおうじ'},
+{id:'si',name:'せいぶいけぶくろせん',kanji:'西武池袋線',c:'#e8650c',code:'SI',cat:'pri',st:'池袋|いけぶくろ,椎名町|しいなまち,東長崎|ひがしながさき,江古田|えこだ,桜台|さくらだい,練馬|ねりま,中村橋|なかむらばし,富士見台|ふじみだい,練馬高野台|ねりまたかのだい,石神井公園|しゃくじいこうえん,大泉学園|おおいずみがくえん,保谷|ほうや,ひばりヶ丘|ひばりがおか,東久留米|ひがしくるめ,清瀬|きよせ,秋津|あきつ,所沢|ところざわ,西所沢|にしところざわ,小手指|こてさし,狭山ヶ丘|さやまがおか,武蔵藤沢|むさしふじさわ,稲荷山公園|いなりやまこうえん,入間市|いるまし,仏子|ぶし,元加治|もとかじ,飯能|はんのう'},
+{id:'tj',name:'とうぶとうじょうせん',kanji:'東武東上線',c:'#0f6cc3',code:'TJ',cat:'pri',st:'池袋|いけぶくろ,北池袋|きたいけぶくろ,下板橋|しもいたばし,大山|おおやま,中板橋|なかいたばし,ときわ台|ときわだい,上板橋|かみいたばし,東武練馬|とうぶねりま,下赤塚|しもあかつか,成増|なります,和光市|わこうし,朝霞|あさか,朝霞台|あさかだい,志木|しき,柳瀬川|やなせがわ,みずほ台|みずほだい,鶴瀬|つるせ,ふじみ野|ふじみの,上福岡|かみふくおか,新河岸|しんがし,川越|かわごえ,川越市|かわごえし,霞ケ関|かすみがせき|霞ケ関(東武),鶴ヶ島|つるがしま,若葉|わかば,坂戸|さかど,北坂戸|きたさかど,高坂|たかさか,東松山|ひがしまつやま,森林公園|しんりんこうえん,つきのわ|つきのわ,武蔵嵐山|むさしらんざん,小川町|おがわまち|小川町(東武)'},
+{id:'kk',name:'けいきゅうほんせん',kanji:'京急本線',c:'#d6001c',cat:'pri',st:'泉岳寺|せんがくじ,品川|しながわ,北品川|きたしながわ,新馬場|しんばんば,青物横丁|あおものよこちょう,鮫洲|さめず,立会川|たちあいがわ,大森海岸|おおもりかいがん,平和島|へいわじま,大森町|おおもりまち,梅屋敷|うめやしき,京急蒲田|けいきゅうかまた,雑色|ぞうしき,六郷土手|ろくごうどて,京急川崎|けいきゅうかわさき,八丁畷|はっちょうなわて,鶴見市場|つるみいちば,京急鶴見|けいきゅうつるみ,花月総持寺|かげつそうじじ,生麦|なまむぎ,京急新子安|けいきゅうしんこやす,子安|こやす,神奈川新町|かながわしんまち,京急東神奈川|けいきゅうひがしかながわ,神奈川|かながわ,横浜|よこはま,戸部|とべ,日ノ出町|ひのでちょう,黄金町|こがねちょう,南太田|みなみおおた,井土ヶ谷|いどがや,弘明寺|ぐみょうじ,上大岡|かみおおおか,屏風浦|びょうぶがうら,杉田|すぎた,京急富岡|けいきゅうとみおか,能見台|のうけんだい,金沢文庫|かなざわぶんこ,金沢八景|かなざわはっけい,追浜|おっぱま,京急田浦|けいきゅうたうら,安針塚|あんじんづか,逸見|へみ,汐入|しおいり,横須賀中央|よこすかちゅうおう,県立大学|けんりつだいがく,堀ノ内|ほりのうち,京急大津|けいきゅうおおつ,馬堀海岸|まぼりかいがん,浦賀|うらが'},
+{id:'mm',name:'みなとみらいせん',kanji:'みなとみらい線',c:'#09357f',code:'MM',cat:'pri',st:'横浜|よこはま,新高島|しんたかしま,みなとみらい|みなとみらい,馬車道|ばしゃみち,日本大通り|にほんおおどおり,元町・中華街|もとまち・ちゅうかがい'},
+{id:'en',name:'えのしまでんてつ',kanji:'江ノ島電鉄',c:'#2b8a3e',code:'EN',cat:'pri',st:'藤沢|ふじさわ,石上|いしがみ,柳小路|やなぎこうじ,鵠沼|くげぬま,湘南海岸公園|しょうなんかいがんこうえん,江ノ島|えのしま,腰越|こしごえ,鎌倉高校前|かまくらこうこうまえ,七里ヶ浜|しちりがはま,稲村ヶ崎|いなむらがさき,極楽寺|ごくらくじ,長谷|はせ,由比ヶ浜|ゆいがはま,和田塚|わだづか,鎌倉|かまくら'},
+{id:'sa',name:'とでんあらかわせん',kanji:'都電荒川線',c:'#d9418e',code:'SA',cat:'pri',st:'三ノ輪橋|みのわばし,荒川一中前|あらかわいっちゅうまえ,荒川区役所前|あらかわくやくしょまえ,荒川二丁目|あらかわにちょうめ,荒川七丁目|あらかわななちょうめ,町屋駅前|まちやえきまえ,町屋二丁目|まちやにちょうめ,東尾久三丁目|ひがしおぐさんちょうめ,熊野前|くまのまえ,宮ノ前|みやのまえ,小台|おだい,荒川遊園地前|あらかわゆうえんちまえ,荒川車庫前|あらかわしゃこまえ,梶原|かじわら,栄町|さかえちょう,王子駅前|おうじえきまえ,飛鳥山|あすかやま,滝野川一丁目|たきのがわいっちょうめ,西ケ原四丁目|にしがはらよんちょうめ,新庚申塚|しんこうしんづか,庚申塚|こうしんづか,巣鴨新田|すがもしんでん,大塚駅前|おおつかえきまえ,向原|むこうはら,東池袋四丁目|ひがしいけぶくろよんちょうめ,都電雑司ケ谷|とでんぞうしがや,鬼子母神前|きしぼじんまえ,学習院下|がくしゅういんした,面影橋|おもかげばし,早稲田|わせだ|早稲田(都電)'},
+{id:'u',name:'ゆりかもめ',kanji:'ゆりかもめ',c:'#1b5aa8',code:'U',cat:'pri',st:'新橋|しんばし,汐留|しおどめ,竹芝|たけしば,日の出|ひので,芝浦ふ頭|しばうらふとう,お台場海浜公園|おだいばかいひんこうえん,台場|だいば,東京国際クルーズターミナル|とうきょうこくさいくるーずたーみなる,テレコムセンター|てれこむせんたー,青海|あおみ,東京ビッグサイト|とうきょうびっぐさいと,有明|ありあけ,有明テニスの森|ありあけてにすのもり,市場前|しじょうまえ,新豊洲|しんとよす,豊洲|とよす'},
+{id:'mo',name:'とうきょうものれーる',kanji:'東京モノレール',c:'#1b4b9b',code:'MO',cat:'pri',st:'モノレール浜松町|ものれーるはままつちょう,天王洲アイル|てんのうずあいる,大井競馬場前|おおいけいばじょうまえ,流通センター|りゅうつうせんたー,昭和島|しょうわじま,整備場|せいびじょう,天空橋|てんくうばし,羽田空港第3ターミナル|はねだくうこうだいさんたーみなる,新整備場|しんせいびじょう,羽田空港第1ターミナル|はねだくうこうだいいちたーみなる,羽田空港第2ターミナル|はねだくうこうだいにたーみなる'},
+{id:'r',name:'りんかいせん',kanji:'りんかい線',c:'#00418e',code:'R',cat:'pri',st:'新木場|しんきば,東雲|しののめ,国際展示場|こくさいてんじじょう,東京テレポート|とうきょうてれぽーと,天王洲アイル|てんのうずあいる,品川シーサイド|しながわしーさいど,大井町|おおいまち,大崎|おおさき'},
+{id:'tx',name:'つくばえくすぷれす',kanji:'つくばエクスプレス',c:'#d6283b',code:'TX',cat:'pri',st:'秋葉原|あきはばら,新御徒町|しんおかちまち,浅草|あさくさ,南千住|みなみせんじゅ,北千住|きたせんじゅ,青井|あおい,六町|ろくちょう,八潮|やしお,三郷中央|みさとちゅうおう,南流山|みなみながれやま,流山セントラルパーク|ながれやませんとらるぱーく,流山おおたかの森|ながれやまおおたかのもり,柏の葉キャンパス|かしわのはきゃんぱす,柏たなか|かしわたなか,守谷|もりや,みらい平|みらいだいら,みどりの|みどりの,万博記念公園|ばんぱくきねんこうえん,研究学園|けんきゅうがくえん,つくば|つくば'}
+];
+const LINES = {};
+for (const x of RAW) {
+  x.k = x.cat === 'shin' ? 2 : 1;
+  x.code = x.code || '';
+  const st0 = x.st.split(',');
+  x.st = st0.map((s, i) => { const [n, k, key] = s.split('|'); return {n, k, id: key || n, no: x.code ? x.code + String((x.start || 1) + (x.dir || 1) * i).padStart(2, '0') : ''}; });
+  LINES[x.id] = x;
+}
+if (0) [].split(',').map((s, i) => { const [n, k] = s.split('|'); return {n, k, no: LINES[id].code ? LINES[id].code + String(i + 1).padStart(2, '0') : ''}; });
+const ALL_JAPAN = 9000;
+
+let S = JSON.parse($('st').textContent);
+let art = null, artReady = false;
+const LS = 'shukudai-train-v1';
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const lsDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
+
+const today = () => { const d = new Date(); return (d.getMonth() + 1) + '/' + d.getDate(); };
+const L = () => LINES[S.line];
+const stPos = () => S.pos[S.line] || 0;
+const lineCount = id => LINES[id].st.filter(s => S.stamps[s.id]).length;
+const perStation = () => S.min * L().k * 60000;
+
+function stampSvg(s, color, date, rot) {
+  const len = [...s.n].length, fs = Math.min(30, 92 / len);
+  return `<svg viewBox="0 0 120 120" aria-label="${s.n}"><g transform="rotate(${rot} 60 60)" style="opacity:.92">
+  <circle cx="60" cy="60" r="54" fill="none" stroke="${color}" stroke-width="4"/>
+  <circle cx="60" cy="60" r="46" fill="none" stroke="${color}" stroke-width="1.5"/>
+  <text x="60" y="34" text-anchor="middle" font-size="11" font-weight="800" fill="${color}">${s.no || '★'}</text>
+  <text x="60" y="${62 + fs / 3}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="${color}">${s.n}</text>
+  <text x="60" y="84" text-anchor="middle" font-size="${Math.min(10, 120 / [...s.k].length)}" fill="${color}">${s.k}</text>
+  <text x="60" y="98" text-anchor="middle" font-size="10" fill="${color}">${date === 'start' ? '出発' : date}</text></g></svg>`;
+}
+function emptySvg(s) {
+  return `<svg viewBox="0 0 120 120" aria-label="まだ"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--edge)" stroke-width="3" stroke-dasharray="6 6"/>
+  <text x="60" y="72" text-anchor="middle" font-size="34" font-weight="800" fill="var(--edge)">？</text></svg>`;
+}
+const rotOf = n => ([...n].reduce((a, c) => a + c.charCodeAt(0), 0) % 17) - 8;
+
+function render() {
+  const l = L(), st = l.st, p = stPos();
+  document.documentElement.style.setProperty('--lc', l.c);
+  $('lineTitle').textContent = l.kanji;
+  $('today').textContent = l.name + '　今日は ' + today();
+  const cur = st[p];
+  const prev = p > 0 ? st[p - 1] : (l.loop ? st[st.length - 1] : null);
+  const next = p < st.length - 1 ? st[p + 1] : (l.loop ? st[0] : null);
+  $('sign').innerHTML = `<div class="main">${cur.no ? `<div class="num"><b>${l.code}</b><span>${cur.no.slice(l.code.length)}</span></div>` : '<div></div>'}
+    <div class="nm"><div class="kana">${cur.k}</div><div class="kanji">${cur.n}</div></div><div></div></div>
+    <div class="bar"><span>${prev ? '◀ ' + prev.n : ''}</span><span>今 ここ</span><span>${next ? next.n + ' ▶' : '終点'}</span></div>`;
+  const ended = !next;
+  $('depart').disabled = ended;
+  $('depart').textContent = ended ? 'せいは！ ほかの 路線へ' : '出発！';
+  const total = Object.keys(S.stamps).length, have = lineCount(S.line);
+  $('meter').innerHTML = `${l.kanji} ${have} / ${st.length}駅<div class="track"><div class="fill" style="width:${have / st.length * 100}%"></div></div>
+    <div style="margin-top:6px">日本の 駅 全部（約${ALL_JAPAN.toLocaleString()}駅）まで あと ${(ALL_JAPAN - total).toLocaleString()}駅</div>`;
+  $('bookTitle').textContent = l.kanji + ' スタンプ帳';
+  $('grid').innerHTML = st.map((s, i) => `<div class="cell${i === p ? ' here' : ''}">${S.stamps[s.id] ? stampSvg(s, l.c, S.stamps[s.id], rotOf(s.n)) : emptySvg(s)}
+    <div class="cap">${S.stamps[s.id] ? s.k : 'まだ'}</div></div>`).join('');
+  $('lines').innerHTML = `<p class="lsum">せいはした路線 ${RAW.filter(x => S.done[x.id]).length} / ${RAW.length}</p>` + CATS.map(([cat, lab]) => `<h3>${lab}</h3><div class="lgrid">` + RAW.filter(x => x.cat === cat).map(x => [x.id, x]).map(([id, x]) => `<button class="ln${id === S.line ? ' on' : ''}" data-line="${id}" style="--c:${x.c}">
+    <span class="t"><i></i>${x.kanji}</span><span class="s">${x.name}<br>${lineCount(id)} / ${x.st.length}駅</span>
+    ${S.done[id] ? `<span class="badge">せいは ${S.done[id]}</span>` : ''}</button>`).join('') + '</div>').join('');
+  $('min').value = String(S.min);
+  const rides = S.rides.slice(-7).reverse();
+  $('log').innerHTML = rides.length ? '最近の記録：<br>' + rides.map(r => `${r.d}　${r.m}分　${r.n}駅`).join('<br>') : 'まだ記録はありません';
+}
+
+/* ---- saving ---- */
+function docWith(state) {
+  const json = JSON.stringify(state).replace(/</g, '\\u003c');
+  return TEMPLATE.replace(/(<script type="application\/json" id="st">)[\s\S]*?(<\/script>)/, (m, a, b) => a + json + b);
+}
+async function save(celebrate) {
+  S.t = Date.now();
+  lsSet(LS, JSON.stringify(S));
+  if (art) {
+    try { await art.publish(docWith(S)); return; }
+    catch (e) { if (String(e && (e.code || e.message || e)).includes('conflict')) return; }
+  }
+  render();
+  if (celebrate) showCelebration();
+}
+
+/* ---- ride ---- */
+let rideStart = 0, tick = 0, wake = null, shown = 0;
+function rideInfo() {
+  const el = Date.now() - rideStart + (S.carry || 0);
+  const l = L(), p = stPos();
+  let n = Math.floor(el / perStation());
+  if (!l.loop) n = Math.min(n, l.st.length - 1 - p);
+  return {el, n, minutes: Math.round((Date.now() - rideStart) / 60000)};
+}
+function stationAt(k) { const l = L(), n = l.st.length; return l.st[(((stPos() + k) % n) + n) % n]; }
+function drawRide() {
+  const {n} = rideInfo();
+  const nx = stationAt(n + 1), l = L();
+  const end = !l.loop && stPos() + n >= l.st.length - 1;
+  $('rideNext').innerHTML = end ? '終点に 着きました' : `次は<span class="rk">${nx.k}</span><b>${nx.n}</b>`;
+  if (n !== shown || !$('rideDots').children.length) {
+    $('rideDots').innerHTML = Array.from({length: n}, (_, i) => `<span class="${i >= shown ? 'new' : ''}"></span>`).join('');
+    if (n > shown) { try { navigator.vibrate && navigator.vibrate(200); } catch (e) {} }
+    shown = n;
+  }
+}
+async function startRide(resumeAt) {
+  rideStart = resumeAt || Date.now();
+  lsSet(LS + '-ride', JSON.stringify({t: rideStart, line: S.line}));
+  shown = -1; $('rideDots').innerHTML = '';
+  $('ride').classList.add('show');
+  drawRide(); shown = rideInfo().n; drawRide();
+  tick = setInterval(drawRide, 1000);
+  if (!resumeAt) { try { await document.documentElement.requestFullscreen(); } catch (e) {} }
+  try { wake = await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+function stopRide() {
+  clearInterval(tick);
+  try { wake && wake.release(); } catch (e) {}
+  try { document.fullscreenElement && document.exitFullscreen(); } catch (e) {}
+  $('ride').classList.remove('show');
+}
+let pending = null;
+function arrive() {
+  const info = rideInfo();
+  stopRide();
+  pending = info;
+  const l = L();
+  const list = Array.from({length: info.n}, (_, i) => stationAt(i + 1));
+  $('resTitle').textContent = info.n ? `${info.n}駅 進んだ！` : 'まだ 次の 駅の 手前';
+  $('resStamps').className = 'stamps';
+  $('resStamps').innerHTML = list.map(s => `<div style="opacity:.35">${stampSvg(s, l.c, today(), rotOf(s.n))}</div>`).join('');
+  $('resMsg').textContent = info.n ? '車しょうさん（大人）に 宿題を 見せてね' : '次の 駅まで あと 少し。今日は ここで とちゅう下車？';
+  $('approve').querySelector('span').textContent = '車しょう かくにん（長おし）';
+  $('approve').style.display = info.n ? '' : 'none';
+  $('resClose').textContent = info.n ? 'やりなおす（スタンプなし）' : 'とちゅう下車する';
+  $('res').classList.add('show');
+}
+function apply() {
+  const info = pending; if (!info) return;
+  pending = null;
+  lsDel(LS + '-ride');
+  const l = L(), news = [];
+  for (let i = 1; i <= info.n; i++) { const s = stationAt(i); if (!S.stamps[s.id]) { S.stamps[s.id] = today(); news.push(s.id); } }
+  S.pos[S.line] = (stPos() + info.n) % l.st.length;
+  S.carry = info.el - info.n * perStation();
+  if (!l.loop && S.pos[S.line] >= l.st.length - 1) S.carry = 0;
+  let done = false;
+  if (!S.done[S.line] && l.st.every(s => S.stamps[s.id])) { S.done[S.line] = today(); done = true; }
+  S.rides.push({d: today(), m: info.minutes, n: info.n});
+  if (S.rides.length > 200) S.rides = S.rides.slice(-200);
+  S.last = info.n ? {t: Date.now(), line: S.line, ids: Array.from({length: info.n}, (_, i) => stationAt(i - info.n + 1).id), news, done} : null;
+  $('res').classList.remove('show');
+  save(true);
+}
+function showCelebration() {
+  const c = S.last; if (!c || lsGet(LS + '-seen') === String(c.t)) return;
+  lsSet(LS + '-seen', String(c.t));
+  const l = LINES[c.line];
+  const sts = c.ids.map(n => l.st.find(s => s.id === n)).filter(Boolean);
+  $('resTitle').textContent = c.done ? `${l.kanji} せいは！` : (c.news.length ? `スタンプ ${c.news.length}こ ゲット！` : `${sts.length}駅 進んだ！`);
+  $('resStamps').className = 'stamps got';
+  $('resStamps').innerHTML = sts.map((s, i) => `<div style="animation-delay:${i * .25}s">${stampSvg(s, l.c, S.stamps[s.id] || today(), rotOf(s.n))}</div>`).join('');
+  $('resStamps').querySelectorAll('svg').forEach((v, i) => v.style.animationDelay = (i * .25) + 's');
+  $('resMsg').textContent = c.news.length ? 'スタンプ帳に おしたよ' : 'もう 持っている 駅だったよ。でも ちゃんと 進んだ！';
+  $('approve').style.display = 'none';
+  $('resClose').textContent = 'とじる';
+  $('res').classList.add('show');
+}
+
+/* ---- long press ---- */
+function holdable(btn, ms, fn) {
+  let t = 0, raf = 0, bar = btn.querySelector('i');
+  const stop = () => { cancelAnimationFrame(raf); t = 0; if (bar) bar.style.transform = 'scaleX(0)'; };
+  const step = () => { const k = (performance.now() - t) / ms; if (bar) bar.style.transform = `scaleX(${Math.min(k, 1)})`;
+    if (k >= 1) { stop(); fn(); } else raf = requestAnimationFrame(step); };
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); t = performance.now(); raf = requestAnimationFrame(step); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+/* ---- events ---- */
+$('depart').addEventListener('click', () => startRide());
+$('arrive').addEventListener('click', arrive);
+holdable($('approve'), 2000, apply);
+$('resClose').addEventListener('click', () => {
+  const drop = pending && S.carry;
+  if (pending) { pending = null; lsDel(LS + '-ride'); }
+  $('res').classList.remove('show');
+  if (drop) { S.carry = 0; save(false); }
+});
+$('lines').addEventListener('click', e => {
+  const b = e.target.closest('[data-line]'); if (!b || b.dataset.line === S.line) return;
+  S.line = b.dataset.line; S.carry = 0;
+  const first = L().st[0];
+  if (!S.stamps[first.id]) S.stamps[first.id] = 'start';
+  save(false);
+});
+$('min').addEventListener('change', e => { S.min = Number(e.target.value); S.carry = 0; save(false); });
+const rb = $('reset'); rb.insertAdjacentHTML('afterbegin', '<i></i>'); rb.classList.add('hold');
+rb.style.background = 'transparent'; rb.style.color = 'var(--ink)';
+holdable(rb, 3000, () => { S = {line: 'jy', pos: {jy: 0, tk: 0}, stamps: {'東京': 'start'}, done: {}, min: S.min, carry: 0, rides: [], last: null, t: 0}; save(false); });
+
+$('bkCopy').addEventListener('click', async () => {
+  const txt = 'SHUKUDAI1:' + btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  try { await navigator.clipboard.writeText(txt); $('bkMsg').textContent = 'コピーしました。メモなどに貼り付けて保存してください。'; }
+  catch (e) { $('bkIn').value = txt; $('bkIn').select(); $('bkMsg').textContent = '下の文字をすべて選んでコピーしてください。'; }
+});
+$('bkLoad').addEventListener('click', () => {
+  try {
+    const v = $('bkIn').value.trim().replace(/^SHUKUDAI1:/, '');
+    const o = JSON.parse(decodeURIComponent(escape(atob(v))));
+    if (!o || typeof o.stamps !== 'object' || typeof o.pos !== 'object' || !LINES[o.line]) throw 0;
+    S = o; $('bkIn').value = ''; $('bkMsg').textContent = '読み込みました。'; save(false);
+  } catch (e) { $('bkMsg').textContent = '読み込めませんでした。文字が全部貼り付けられているか確認してください。'; }
+});
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist().catch(() => {}); } catch (e) {}
+$('tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  $('side').dataset.tab = b.dataset.tab;
+  for (const x of $('tabs').children) x.setAttribute('aria-selected', String(x === b));
+  if (b.dataset.tab === 'set') $('setd').open = true;
+  $('side').querySelector('.panes').scrollTop = 0;
+});
+{ const secs = document.querySelectorAll('.panes > section'); if (secs[1]) secs[1].classList.add('sec-lines'); if (secs[2]) secs[2].classList.add('sec-set'); }
+
+/* ---- boot ---- */
+render();
+const r = lsGet(LS + '-ride');
+if (r) { try { const o = JSON.parse(r); if (o.line === S.line && Date.now() - o.t < 4 * 3600000) startRide(o.t); else lsDel(LS + '-ride'); } catch (e) {} }
+showCelebration();
+Promise.resolve(window.claude && window.claude.use ? window.claude.use('artifact') : null).then(a => {
+  art = a; artReady = true;
+  if (!art) {
+    try { const loc = JSON.parse(lsGet(LS) || 'null'); if (loc && loc.t > (S.t || 0)) { S = loc; render(); } } catch (e) {}
+  }
+}).catch(() => { artReady = true; });
+}
+</script></body></html>
